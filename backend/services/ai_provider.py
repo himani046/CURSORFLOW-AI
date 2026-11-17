@@ -15,7 +15,20 @@ def _model_name():
 
 def _client():
     key = os.getenv("GEMINI_API_KEY")
-    return genai.Client(api_key=key) if key else None
+    if not key:
+        return None
+    # Retry only transient service/rate-limit failures. Invalid keys and bad requests
+    # should fail immediately rather than wasting time.
+    retry_options = types.HttpRetryOptions(
+        attempts=5,
+        initial_delay=1.0,
+        max_delay=16.0,
+        http_status_codes=[408, 429, 500, 502, 503, 504],
+    )
+    return genai.Client(
+        api_key=key,
+        http_options=types.HttpOptions(retry_options=retry_options),
+    )
 
 def _error_message(exc: Exception) -> str:
     """Return a useful, key-safe diagnostic for local development."""
@@ -29,6 +42,8 @@ def _error_message(exc: Exception) -> str:
         return "Gemini quota or rate limit reached. Check usage and quota in Google AI Studio."
     if any(token in lowered for token in ("404", "not found", "model not found")):
         return f"Gemini model '{_model_name()}' was not found or is unavailable to this API key."
+    if any(token in lowered for token in ("503", "unavailable", "high demand", "temporarily overloaded")):
+        return "Gemini is temporarily overloaded (503). CURSORFLOW retries transient errors automatically; if it persists, wait a little and try again."
     if any(token in lowered for token in ("timeout", "timed out", "connection", "network")):
         return "Could not reach Gemini. Check your internet connection and try again."
     return f"Gemini request failed ({type(exc).__name__}): {raw[:500] or 'No additional details returned.'}"
