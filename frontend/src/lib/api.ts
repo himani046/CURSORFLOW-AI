@@ -20,6 +20,7 @@ export const api = {
     request<SimplifyResult>('/api/simplify', { method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({text, mode, target_lang}) }),
   simplifySource: (form: FormData) => request<SimplifyResult>('/api/simplify-source', {method:'POST', body:form}),
+  translate: (text:string, target_lang:string) => request<{translated_text:string;target_lang:string;provider:string}>('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,target_lang})}),
   refine: (transcript: string, target_lang: string, simplify: boolean) =>
     request<{refined_transcript:string;provider:string}>('/api/stt-refine', {method:'POST',
       headers:{'Content-Type':'application/json'}, body:JSON.stringify({transcript,target_lang,simplify})}),
