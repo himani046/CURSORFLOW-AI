@@ -8,6 +8,10 @@ from io import BytesIO
 
 router = APIRouter()
 
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: str = "hi-IN"
+
 class SimplifyRequest(BaseModel):
     text: str
     mode: Literal["easy_read", "eli5", "action_items"] = "easy_read"
@@ -38,7 +42,7 @@ def local_simplify(source: str, mode: str) -> str:
         return "Steps to consider:\n" + "\n".join(f"- {s}." for s in sentences[:8])
     return "\n".join(f"- {s}." for s in sentences[:8]) if mode == "easy_read" else " ".join(s + "." for s in sentences[:6])
 
-@router.post("/simplify")
+@router.post("/translate")\ndef translate_text(payload: TranslateRequest):\n    if not payload.text.strip():\n        raise HTTPException(400, "Text to translate is required.")\n    prompt = ("Translate the following text faithfully into " + payload.target_lang + ". Preserve meaning, names, numbers, warnings and medical/legal details. Return only the translation in plain text. Do not add Markdown headings, hashes, horizontal rules, bold markers or commentary.\\n\\n" + payload.text[:24000])\n    translated, provider, provider_error = generate_text(prompt, fallback=payload.text)\n    return {"translated_text": translated, "target_lang": payload.target_lang, "provider": provider, "provider_error": provider_error}\n\n@router.post("/simplify")
 def simplify_text(payload: SimplifyRequest):
     return build_result(payload.text, payload.mode, payload.target_lang)
 
