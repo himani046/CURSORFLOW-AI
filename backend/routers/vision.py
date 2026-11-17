@@ -27,9 +27,9 @@ async def vision(image: UploadFile = File(...), mode: str = Form("describe"),
         "ocr": "Transcribe all legible printed text, preserving layout where possible. Mark uncertain characters.",
         "qa": f"Answer the user's question about the image: {question}. If not visible, say so."
     }[mode] + f" Respond in {target_lang}. Return JSON with description, extracted_text, spatial_zones (left, center, right), safety_level (clear, caution, warning), hazards, answer."
-    result, provider = generate_vision(prompt, encoded, fallback={
-        "description": "Image received and validated. Configure GEMINI_API_KEY to enable scene description.",
+    result, provider, provider_error = generate_vision(prompt, encoded, fallback={
+        "description": "Image received and validated. The scene was not analysed by AI.",
         "extracted_text": "", "spatial_zones": {"left":"Not analysed","center":"Not analysed","right":"Not analysed"},
         "safety_level": "caution", "hazards": [], "answer": None
     })
-    return {**result, "target_lang": target_lang, "provider": provider}
+    return {**result, "target_lang": target_lang, "provider": provider, "provider_error": provider_error}
