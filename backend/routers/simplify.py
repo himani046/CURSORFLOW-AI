@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 from typing import Literal
 from services.ai_provider import generate_text
 from services.extractors import extract_pdf, extract_web
@@ -22,13 +22,14 @@ def build_result(source: str, mode: str, lang: str):
         f"Output language: {lang}. Format: {mode}. Include a concise plain-language version and key points.\n\n"
         f"CONTENT:\n{source[:24000]}"
     )
-    simplified, provider = generate_text(prompt, fallback=local_simplify(source, mode))
+    simplified, provider, provider_error = generate_text(prompt, fallback=local_simplify(source, mode))
     return {
         "extracted_source_text": source[:24000], "simplified_text": simplified,
         "english_parallel": simplified if lang.startswith("en") else None,
         "bullet_points": [x.strip("- •") for x in simplified.splitlines() if x.strip().startswith(("-", "•"))][:12],
         "original_grade": grade(source), "simplified_grade": grade(simplified),
-        "target_lang": lang, "mode": mode, "provider": provider
+        "target_lang": lang, "mode": mode, "provider": provider,
+        "provider_error": provider_error
     }
 
 def local_simplify(source: str, mode: str) -> str:
