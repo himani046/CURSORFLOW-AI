@@ -22,7 +22,7 @@ def build_result(source: str, mode: str, lang: str):
         raise HTTPException(400, "No readable text was found.")
     prompt = (
         "Rewrite the supplied content accurately for accessibility. Do not invent facts or omit warnings. "
-        "Use short sentences, common words and clear, simple paragraphs. "
+        "Use short sentences, common words and clear, simple paragraphs. Return plain text only. Do not use Markdown, heading hashes, horizontal rules, bold or italic markers, code fences, or decorative separators. "
         f"Output language: {lang}. Format: {mode}. Include a concise plain-language version and key points.\n\n"
         f"CONTENT:\n{source[:24000]}"
     )
