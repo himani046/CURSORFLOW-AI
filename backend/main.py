@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from routers import simplify, vision, speech, assistant
+from services.ai_provider import check_gemini_connection
 
 load_dotenv()
 app = FastAPI(title="CURSORFLOW Accessibility API", version="1.0.0",
@@ -22,3 +23,8 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok", "ai_configured": bool(os.getenv("GEMINI_API_KEY"))}
+
+@app.get("/api/diagnostics/gemini")
+def gemini_diagnostics():
+    """Make a small live Gemini request; reports connection status without exposing the API key."""
+    return check_gemini_connection()
