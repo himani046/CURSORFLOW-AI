@@ -29,7 +29,7 @@ export function VisionModule({lang}:Props){
      <h3>Spatial orientation</h3><div className="spatial-zones">{(['left','center','right'] as const).map(z=><div key={z}><span>{z.toUpperCase()}</span><p>{result.spatial_zones?.[z]||'Not reported'}</p></div>)}</div>
      {result.extracted_text&&<><h3>Text in image</h3><blockquote>{result.extracted_text}</blockquote></>}
      {result.hazards?.length>0&&<><h3>Possible hazards</h3><ul>{result.hazards.map((h,i)=><li key={i}>{h}</li>)}</ul></>}
-     {result.provider==='offline_fallback'&&<p className="notice">Image is validated; Gemini is not configured, so the scene was not analysed.</p>}
+     {result.provider==='offline_fallback'&&<p className="notice" role="status">AI image analysis was unavailable. {result.provider_error||'Check the Gemini connection and backend configuration.'}</p>}
      <button className="small-button" onClick={async()=>{const u=await api.tts(result.description||result.answer||'No description available',lang,1);new Audio(u).play()}}>▶ Read report aloud</button>
     </>:<div className="empty-output"><div className="empty-icon">◉</div><h3>A clearer picture of your surroundings.</h3><p>Descriptions, printed words, spatial cues, and possible hazards will appear here.</p></div>}
    </div>
