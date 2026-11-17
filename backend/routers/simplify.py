@@ -22,7 +22,7 @@ def build_result(source: str, mode: str, lang: str):
         raise HTTPException(400, "No readable text was found.")
     prompt = (
         "Rewrite the supplied content accurately for accessibility. Do not invent facts or omit warnings. "
-        "Use short sentences, common words, clear headings and actionable bullets. "
+        "Use short sentences, common words and clear, simple paragraphs. "
         f"Output language: {lang}. Format: {mode}. Include a concise plain-language version and key points.\n\n"
         f"CONTENT:\n{source[:24000]}"
     )
@@ -42,7 +42,21 @@ def local_simplify(source: str, mode: str) -> str:
         return "Steps to consider:\n" + "\n".join(f"- {s}." for s in sentences[:8])
     return "\n".join(f"- {s}." for s in sentences[:8]) if mode == "easy_read" else " ".join(s + "." for s in sentences[:6])
 
-@router.post("/translate")\ndef translate_text(payload: TranslateRequest):\n    if not payload.text.strip():\n        raise HTTPException(400, "Text to translate is required.")\n    prompt = ("Translate the following text faithfully into " + payload.target_lang + ". Preserve meaning, names, numbers, warnings and medical/legal details. Return only the translation in plain text. Do not add Markdown headings, hashes, horizontal rules, bold markers or commentary.\\n\\n" + payload.text[:24000])\n    translated, provider, provider_error = generate_text(prompt, fallback=payload.text)\n    return {"translated_text": translated, "target_lang": payload.target_lang, "provider": provider, "provider_error": provider_error}\n\n@router.post("/simplify")
+@router.post("/translate")
+def translate_text(payload: TranslateRequest):
+    if not payload.text.strip():
+        raise HTTPException(400, "Text to translate is required.")
+    prompt = (
+        "Translate the following text faithfully into " + payload.target_lang
+        + ". Preserve meaning, names, numbers, warnings and medical/legal details. "
+        "Return only the translation in plain text. Do not add Markdown headings, hashes, "
+        "horizontal rules, bold markers or commentary.\\n\\n" + payload.text[:24000]
+    )
+    translated, provider, provider_error = generate_text(prompt, fallback=payload.text)
+    return {"translated_text": translated, "target_lang": payload.target_lang,
+            "provider": provider, "provider_error": provider_error}
+
+@router.post("/simplify")
 def simplify_text(payload: SimplifyRequest):
     return build_result(payload.text, payload.mode, payload.target_lang)
 
