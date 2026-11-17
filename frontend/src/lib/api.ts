@@ -13,7 +13,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export type SimplifyResult = {
   extracted_source_text: string; simplified_text: string; english_parallel?: string | null
   bullet_points: string[]; original_grade: number | null; simplified_grade: number | null
-  target_lang: string; provider: string
+  target_lang: string; provider: string; provider_error?: string | null
 }
 export const api = {
   simplify: (text: string, mode: string, target_lang: string) =>
@@ -28,7 +28,7 @@ export const api = {
       headers:{'Content-Type':'application/json'}, body:JSON.stringify({message,history,target_lang,bilingual})}),
   vision: (form:FormData) => request<{
     description:string;extracted_text:string;spatial_zones:{left:string;center:string;right:string};
-    safety_level:string;hazards:string[];answer:string|null;provider:string
+    safety_level:string;hazards:string[];answer:string|null;provider:string;provider_error?:string|null
   }>('/api/vision',{method:'POST',body:form}),
   tts: async (text:string, lang:string, rate:number) => {
     const response = await fetch(`${BASE}/api/tts`, {method:'POST',headers:{'Content-Type':'application/json'},
