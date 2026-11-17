@@ -4,6 +4,15 @@ from google.genai import types
 
 logger = logging.getLogger("cursorflow.ai")
 
+def _model_name():
+    configured = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").strip()
+    # Gemini 2.5 Flash access is restricted for some newer projects.
+    # Transparently migrate the old project default to Google's current stable Flash model.
+    if configured == "gemini-2.5-flash":
+        logger.warning("GEMINI_MODEL=gemini-2.5-flash is not available to some projects; using gemini-3.6-flash.")
+        return "gemini-3.6-flash"
+    return configured or "gemini-3.6-flash"
+
 def _client():
     key = os.getenv("GEMINI_API_KEY")
     return genai.Client(api_key=key) if key else None
@@ -30,7 +39,7 @@ def generate_text(prompt: str, fallback: str):
         return fallback, "offline_fallback", "GEMINI_API_KEY is missing from the backend environment."
     try:
         response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), contents=prompt)
+            model=_model_name(), contents=prompt)
         text = (response.text or "").strip()
         if not text:
             return fallback, "offline_fallback", "Gemini returned an empty response."
@@ -48,7 +57,7 @@ def generate_vision(prompt: str, image_b64: str, fallback: dict):
         import base64
         image_bytes = base64.b64decode(image_b64)
         response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+            model=_model_name(),
             contents=[prompt, types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")])
         text = response.text or ""
         if not text.strip():
@@ -68,7 +77,7 @@ def generate_vision(prompt: str, image_b64: str, fallback: dict):
 
 def check_gemini_connection():
     client = _client()
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    model = _model_name()
     if client is None:
         return {"configured": False, "connected": False, "model": model,
                 "message": "GEMINI_API_KEY is missing from the backend environment."}
