@@ -14,7 +14,7 @@ export function SimplifyModule({lang,bionic}:Props){
  }catch(e){setError(e instanceof Error?e.message:'Could not simplify content')}finally{setLoading(false)}}
  async function read(){if(!result)return;try{const blob=await api.tts(result.simplified_text,lang,rate);audio?.pause();const next=new Audio(blob);setAudio(next);next.onended=()=>setPlaying(false);await next.play();setPlaying(true)}catch(e){setError(e instanceof Error?e.message:'Audio playback failed')}}
  function stop(){audio?.pause();setPlaying(false)}
- const lines=useMemo(()=>result?.simplified_text.split(/(?<=[.!?])\s+|\n+/).filter(Boolean)||[],[result])
+ const lines=useMemo(()=>result?.simplified_text.split(/(?<=[.!?])\\s+|\\n+/).filter(Boolean)||[],[result])
  return <section className="module-section" id="simplify">
   <div className="section-heading"><div><p className="eyebrow">01 / READ & UNDERSTAND</p><h2>Complex in.<br/><em>Clear out.</em></h2></div><p>Turn long documents, government notices, and complicated language into easy-read information you can act on.</p></div>
   <div className="tool-card simplify-grid">
@@ -29,7 +29,7 @@ export function SimplifyModule({lang,bionic}:Props){
    <div className="tool-output" aria-live="polite"><div className="field-head"><span>YOUR EASY-READ VERSION</span><span className="mono">OUTPUT / 01</span></div>
     {result?<><div className="grade-row"><div><strong>{result.original_grade??'—'}</strong><small>ORIGINAL GRADE</small></div><span>→</span><div><strong className="accent">{result.simplified_grade??'—'}</strong><small>NEW GRADE</small></div></div>
      <div className={'easy-read '+(bionic?'bionic':'')}>{lines.map((line,i)=><p key={i}>{bionic?<Bionic text={line}/>:line}</p>)}</div>
-     {result.provider==='offline_fallback'&&<p className="notice">Offline fallback used. Add GEMINI_API_KEY to enable AI rewriting.</p>}
+     {result.provider==='offline_fallback'&&<p className="notice" role="status">AI rewriting was unavailable. {result.provider_error||'Check the Gemini connection and backend configuration.'}</p>}
      <div className="output-controls"><button className="button primary" onClick={playing?stop:read}>{playing?'■ Stop reading':'▶ Read aloud'}</button><label>Speed <select value={rate} onChange={e=>setRate(Number(e.target.value))}><option value=".75">0.75×</option><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label><button className="small-button" onClick={()=>setRuler(!ruler)} aria-pressed={ruler}>Reading ruler {ruler?'on':'off'}</button></div>
      {ruler&&<div className="ruler-overlay">FOCUS STRIP — follow each line at your own pace</div>}
     </>:<div className="empty-output"><div className="empty-icon">Aa</div><h3>Your clearer version appears here.</h3><p>We’ll show readability scores, short points, and an audio version you can listen to.</p></div>}
@@ -37,4 +37,4 @@ export function SimplifyModule({lang,bionic}:Props){
   </div>
  </section>
 }
-function Bionic({text}:{text:string}){return <>{text.split(/(\s+)/).map((word,i)=>/^\s+$/.test(word)?word:<span key={i}><b>{word.slice(0,Math.max(1,Math.ceil(word.length*.4)))}</b>{word.slice(Math.max(1,Math.ceil(word.length*.4)))}</span>)}</>}
+function Bionic({text}:{text:string}){return <>{text.split(/(\\s+)/).map((word,i)=>/^\\s+$/.test(word)?word:<span key={i}><b>{word.slice(0,Math.max(1,Math.ceil(word.length*.4)))}</b>{word.slice(Math.max(1,Math.ceil(word.length*.4)))}</span>)}</>}
