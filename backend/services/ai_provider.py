@@ -28,7 +28,7 @@ def _error_message(exc: Exception) -> str:
     if any(token in lowered for token in ("429", "resource_exhausted", "quota", "rate limit")):
         return "Gemini quota or rate limit reached. Check usage and quota in Google AI Studio."
     if any(token in lowered for token in ("404", "not found", "model not found")):
-        return f"Gemini model '{os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')}' was not found or is unavailable to this API key."
+        return f"Gemini model '{_model_name()}' was not found or is unavailable to this API key."
     if any(token in lowered for token in ("timeout", "timed out", "connection", "network")):
         return "Could not reach Gemini. Check your internet connection and try again."
     return f"Gemini request failed ({type(exc).__name__}): {raw[:500] or 'No additional details returned.'}"
