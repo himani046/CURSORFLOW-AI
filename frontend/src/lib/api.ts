@@ -34,7 +34,11 @@ export const api = {
   tts: async (text:string, lang:string, rate:number) => {
     const response = await fetch(`${BASE}/api/tts`, {method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({text,lang,rate:`${Math.round((rate-1)*100)>=0?'+':''}${Math.round((rate-1)*100)}%`})})
-    if (!response.ok) throw new Error('Audio generation failed')
+    if (!response.ok) {
+      let detail = `Audio generation failed (${response.status})`
+      try { const body = await response.json(); detail = body.detail || detail } catch { /* keep status */ }
+      throw new Error(detail)
+    }
     return URL.createObjectURL(await response.blob())
   }
 }
