@@ -44,5 +44,6 @@ def refine(payload: RefineRequest):
     prompt = ("Clean up this speech transcript with punctuation and paragraphing. "
               "Do not change its meaning. " + ("Use simpler language. " if payload.simplify else "") +
               f"Output language: {payload.target_lang}.\nTRANSCRIPT:\n{payload.transcript}")
-    result, provider = generate_text(prompt, fallback=payload.transcript.strip())
-    return {"refined_transcript": result, "target_lang": payload.target_lang, "provider": provider}
+    result, provider, provider_error = generate_text(prompt, fallback=payload.transcript.strip())
+    return {"refined_transcript": result, "target_lang": payload.target_lang,
+            "provider": provider, "provider_error": provider_error}
