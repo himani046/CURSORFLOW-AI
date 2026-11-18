@@ -41,9 +41,12 @@ async def tts(payload: TTSRequest):
 
 @router.post("/stt-refine")
 def refine(payload: RefineRequest):
-    prompt = ("Clean up this speech transcript with punctuation and paragraphing. "
-              "Do not change its meaning. " + ("Use simpler language. " if payload.simplify else "") +
-              f"Output language: {payload.target_lang}.\nTRANSCRIPT:\n{payload.transcript}")
+    prompt = ("You are a verbatim transcript editor. Return ONLY the corrected transcript, with punctuation, capitalization and paragraph breaks. "
+              "Do not add an introduction, explanation, label, summary, greeting, or closing. "
+              "Do not paraphrase, translate, complete unclear phrases, or change any words unless correcting an obvious speech-recognition punctuation artifact. "
+              "Preserve the speaker's exact wording and meaning. "
+              + ("If simplification is explicitly requested, simplify only then. " if payload.simplify else "")
+              + f"Transcript language: {payload.target_lang}.\nTRANSCRIPT:\n{payload.transcript}")
     result, provider, provider_error = generate_text(prompt, fallback=payload.transcript.strip())
     return {"refined_transcript": result, "target_lang": payload.target_lang,
             "provider": provider, "provider_error": provider_error}
