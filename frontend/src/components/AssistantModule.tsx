@@ -6,7 +6,7 @@ type Message={role:'user'|'assistant';content:string}
 const starters=['Help me write a polite email','Explain this bill in simple steps','Help me plan my day','Make a checklist for an appointment']
 export function AssistantModule({lang,handsFree}:Props){
  const [messages,setMessages]=useState<Message[]>([{role:'assistant',content:'Hello. I’m your CURSORFLOW assistant. Tell me what you would like help with, and we can work through it one step at a time.'}])
- const [input,setInput]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('')
+ const [input,setInput]=useState('');const [busy,setBusy]=useState(false);const [error,setError]=useState('');const [loadingListen,setLoadingListen]=useState<number|null>(null)
  const speech=useMultilingualSpeech(lang)
  async function send(value=input){if(!value.trim()||busy)return;const next=[...messages,{role:'user' as const,content:value.trim()}];setMessages(next);setInput('');setBusy(true);setError('');try{const out=await api.assistant(value,next.slice(-8),lang,false);setMessages([...next,{role:'assistant',content:out.reply}]);if(handsFree&&out.reply){const url=await api.tts(out.reply,lang,1);const audio=new Audio(url);audio.onended=()=>{if(handsFree)void speech.start()};await audio.play()}}catch(e){setError(e instanceof Error?e.message:'Assistant request failed')}finally{setBusy(false)}}
  function dictate(){if(speech.listening){speech.stop();setInput([speech.transcript,speech.interim].filter(Boolean).join(' ').trim())}else speech.start((captured)=>setInput(captured))}
