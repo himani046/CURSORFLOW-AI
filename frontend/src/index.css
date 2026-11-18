@@ -33,3 +33,7 @@
 .assistant-mic-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:none}
 .assistant-mic-wrap .mic-button.recording{background:var(--lime);animation:mic-ready 1.3s ease-in-out infinite}
 .stop-to-send{font-size:.58rem;line-height:1;color:#9b2b18;white-space:nowrap;font-weight:700}
+
+.listen-spinner{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px;border:2px solid #17171740;border-top-color:#171717;border-radius:50%;animation:listen-spin .7s linear infinite}
+.speak-reply:disabled{opacity:.8;cursor:wait}
+@keyframes listen-spin{to{transform:rotate(360deg)}}
