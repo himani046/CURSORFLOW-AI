@@ -19,7 +19,7 @@ def assistant(payload: AssistantRequest):
       f"Answer in {payload.target_lang}. Bilingual requested: {payload.bilingual}.\n"
       f"Conversation:\n{history}\nUser: {payload.message}"
     )
-    reply, provider = generate_text(prompt, fallback=(
+    reply, provider, provider_error = generate_text(prompt, fallback=(
       "I can help break this into steps.\n\n"
       "1. Tell me the goal and any important details.\n"
       "2. We can organise the information into small steps.\n"
@@ -28,4 +28,4 @@ def assistant(payload: AssistantRequest):
     steps = [x.strip("- •0123456789.").strip() for x in reply.splitlines()
              if x.strip() and (x.strip().startswith(("-", "•")) or x.strip()[0].isdigit())]
     return {"reply": reply, "english_parallel": reply if payload.bilingual else None,
-            "action_steps": steps[:10], "provider": provider}
+            "action_steps": steps[:10], "provider": provider, "provider_error": provider_error}
