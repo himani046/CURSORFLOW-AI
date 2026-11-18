@@ -29,3 +29,7 @@
 .waveform-live span{animation:wave-ready .75s ease-in-out infinite alternate}
 .waveform-live span:nth-child(2n){animation-delay:.15s}.waveform-live span:nth-child(3n){animation-delay:.3s}
 @keyframes wave-ready{from{opacity:.55;transform:scaleY(.65)}to{opacity:1;transform:scaleY(1.15)}}
+
+.assistant-mic-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:none}
+.assistant-mic-wrap .mic-button.recording{background:var(--lime);animation:mic-ready 1.3s ease-in-out infinite}
+.stop-to-send{font-size:.58rem;line-height:1;color:#9b2b18;white-space:nowrap;font-weight:700}
